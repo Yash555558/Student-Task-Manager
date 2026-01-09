@@ -47,10 +47,19 @@ export default function Header({ onCreateClick }) {
       
       {menuOpen && (
         <div className="mobile-drawer">
-          <p>Hi, {user?.name}</p>
-          <button onClick={onCreateClick}>+ Add Task</button>
-          <button onClick={logout}>Logout</button>
-          <button className="close" onClick={() => setMenuOpen(false)}>✕</button>
+          <div className="mobile-drawer-box">
+            <p className="drawer-title">Hi, {user?.name}</p>
+
+            <button className="drawer-primary" onClick={onCreateClick}>+ Add Task</button>
+            <button className="drawer-secondary" onClick={logout}>Logout</button>
+
+            <button
+              className="drawer-close"
+              onClick={() => setMenuOpen(false)}
+            >
+              ✕ Close
+            </button>
+          </div>
         </div>
       )}
     </header>
