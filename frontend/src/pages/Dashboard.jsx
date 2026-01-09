@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   useEffect(() => {
     fetchTasks().then(data => {
@@ -69,6 +70,7 @@ export default function Dashboard() {
   const visibleTasks = tasks.filter(t => {
     if (filter === "completed" && !t.completed) return false;
     if (filter === "pending" && t.completed) return false;
+    if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
     if (!t.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -79,18 +81,21 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-6 py-10 space-y-10">
         <TaskForm onCreate={handleCreate} />
         {!initialized ? <Skeleton /> :
-          <TaskList
-            tasks={visibleTasks}
-            onToggle={handleToggle}
-            onRequestDelete={setDeleteTarget}
-            setFilter={setFilter}
-            setSearch={setSearch}
-          />}
-        <ConfirmDelete
-          open={!!deleteTarget}
-          onCancel={() => setDeleteTarget(null)}
-          onConfirm={confirmDelete}
-        />
+          <>
+            <TaskList
+              tasks={visibleTasks}
+              onToggle={handleToggle}
+              onRequestDelete={setDeleteTarget}
+              setFilter={setFilter}
+              setSearch={setSearch}
+              setPriorityFilter={setPriorityFilter}
+            />
+            <ConfirmDelete
+              open={!!deleteTarget}
+              onCancel={() => setDeleteTarget(null)}
+              onConfirm={confirmDelete}
+            />
+          </>}
       </main>
     </>
   );

@@ -1,6 +1,6 @@
 import TaskCard from "./TaskCard";
 
-export default function TaskList({ tasks, onToggle, onRequestDelete, setFilter, setSearch }) {
+export default function TaskList({ tasks, onToggle, onRequestDelete, setFilter, setSearch, setPriorityFilter }) {
   return (
     <>
       <div className="flex flex-wrap gap-4 items-center mb-6">
@@ -16,6 +16,12 @@ export default function TaskList({ tasks, onToggle, onRequestDelete, setFilter, 
           <option value="all">All</option>
           <option value="pending">Pending</option>
           <option value="completed">Completed</option>
+        </select>
+        <select onChange={e => setPriorityFilter(e.target.value)}>
+          <option value="all">All Priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
         </select>
       </div>
 
