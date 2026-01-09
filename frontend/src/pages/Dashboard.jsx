@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Header from "../components/Header";
+import Loading from "../components/Loading";
+import EmptyState from "../components/EmptyState";
 import {
   fetchTasks,
   createTask,
@@ -16,6 +18,9 @@ const priorityColor = {
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("");
   const [search, setSearch] = useState("");
@@ -27,19 +32,31 @@ export default function Dashboard() {
   });
 
   const loadTasks = async () => {
-    const params = {};
-    if (filter !== "all") params.status = filter;
-    if (sortBy) params.sortBy = sortBy;
-    setTasks(await fetchTasks(params));
+    setLoading(true);
+    setError("");
+    try {
+      const params = {};
+      if (filter !== "all") params.status = filter;
+      if (sortBy) params.sortBy = sortBy;
+      setTasks(await fetchTasks(params));
+    } catch {
+      setError("Failed to load tasks. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadTasks(); }, [filter, sortBy]);
 
   const submitTask = async e => {
     e.preventDefault();
+    if (submitting) return;
+
+    setSubmitting(true);
     await createTask(form);
     setForm({ title: "", description: "", priority: "low", dueDate: "" });
-    loadTasks();
+    await loadTasks();
+    setSubmitting(false);
   };
 
   const filtered = tasks.filter(t =>
@@ -90,9 +107,14 @@ export default function Dashboard() {
           />
 
           <button
-            className="md:col-span-4 bg-primary text-white py-3 rounded-xl font-semibold shadow-soft hover:scale-[1.02] transition"
+            disabled={submitting}
+            className={`md:col-span-4 py-3 rounded-xl font-semibold transition
+              ${submitting
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-primary text-white shadow-soft hover:scale-[1.02]"
+              }`}
           >
-            Create Task
+            {submitting ? "Creating…" : "Create Task"}
           </button>
         </form>
 
@@ -127,52 +149,81 @@ export default function Dashboard() {
         </div>
 
         {/* Task Grid */}
+        {error && (
+          <div className="bg-red-50 text-red-600 px-4 py-2 rounded-xl mb-4">
+            {error}
+          </div>
+        )}
         <section className="grid md:grid-cols-3 gap-6">
-          {filtered.map(task => (
-            <div
-              key={task._id}
-              className={`rounded-2xl p-5 shadow-card transition hover:scale-[1.02]
-              ${task.completed ? "bg-green-50" : "bg-white"}`}
-            >
-              <div className="flex justify-between items-start">
-                <h3 className={`font-semibold text-lg ${task.completed && "line-through text-muted"}`}>
-                  {task.title}
-                </h3>
+          {loading && <Loading label="Fetching tasks…" />}
 
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => updateTask(task._id, { completed: !task.completed }).then(loadTasks)}
-                  className="h-5 w-5"
-                />
-              </div>
+          {!loading && filtered.length === 0 && (
+            <EmptyState
+              title="No tasks found"
+              description={
+                search
+                  ? "Try a different search term."
+                  : "You’re all clear! Add a task to begin."
+              }
+              actionLabel="Add your first task"
+              onAction={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            />
+          )}
 
-              <p className="text-sm text-muted mt-2">
-                {task.description}
-              </p>
+          {!loading &&
+            filtered.map(task => (
+              <div
+                key={task._id}
+                className={`rounded-2xl p-5 shadow-card transition hover:scale-[1.02]
+                ${task.completed ? "bg-green-50" : "bg-white"}`}
+              >
+                <div className="flex justify-between items-start">
+                  <h3 className={`font-semibold text-lg ${task.completed && "line-through text-muted"}`}>
+                    {task.title}
+                  </h3>
 
-              <div className="flex items-center justify-between mt-4">
-                <span className={`px-3 py-1 text-xs rounded-full ${priorityColor[task.priority]}`}>
-                  {task.priority}
-                </span>
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => updateTask(task._id, { completed: !task.completed }).then(loadTasks)}
+                    className="h-5 w-5"
+                  />
+                </div>
 
-                {task.dueDate && (
-                  <span className="text-xs text-muted">
-                    {dayjs(task.dueDate).format("MMM D, YYYY")}
+                <p className="text-sm text-muted mt-2">
+                  {task.description}
+                </p>
+
+                <div className="flex items-center justify-between mt-4">
+                  <span className={`px-3 py-1 text-xs rounded-full ${priorityColor[task.priority]}`}>
+                    {task.priority}
                   </span>
-                )}
-              </div>
 
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={() => deleteTask(task._id).then(loadTasks)}
-                  className="text-sm text-danger hover:underline"
-                >
-                  Delete
-                </button>
+                  {task.dueDate && (
+                    <span className="text-xs text-muted">
+                      {dayjs(task.dueDate).format("MMM D, YYYY")}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        "Are you sure you want to delete this task? This action cannot be undone."
+                      );
+                      if (!confirmed) return;
+
+                      await deleteTask(task._id);
+                      loadTasks();
+                    }}
+                    className="text-sm text-danger hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </section>
 
       </main>
