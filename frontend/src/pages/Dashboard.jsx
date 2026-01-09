@@ -185,8 +185,32 @@ export default function Dashboard() {
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => updateTask(task._id, { completed: !task.completed }).then(loadTasks)}
-                    className="h-5 w-5"
+                    onChange={async () => {
+                      // 1. Optimistically update UI
+                      setTasks(prev =>
+                        prev.map(t =>
+                          t._id === task._id
+                            ? { ...t, completed: !t.completed }
+                            : t
+                        )
+                      );
+
+                      try {
+                        // 2. Sync with backend
+                        await updateTask(task._id, { completed: !task.completed });
+                      } catch (err) {
+                        // 3. Rollback if API fails
+                        setTasks(prev =>
+                          prev.map(t =>
+                            t._id === task._id
+                              ? { ...t, completed: task.completed }
+                              : t
+                          )
+                        );
+                        alert("Failed to update task. Please try again.");
+                      }
+                    }}
+                    className="h-5 w-5 cursor-pointer"
                   />
                 </div>
 
