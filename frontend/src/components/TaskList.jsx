@@ -3,15 +3,13 @@ import TaskCard from "./TaskCard";
 export default function TaskList({ tasks, onToggle, onRequestDelete, setFilter, setSearch, setPriorityFilter }) {
   return (
     <>
-      <div className="flex flex-wrap gap-4 items-center mb-6">
+      <div className="task-controls">
         <input
           placeholder="Search tasks..."
           onChange={e => setSearch(e.target.value)}
-          className="px-4 py-2 rounded-xl border w-64"
         />
         <select
           onChange={e => setFilter(e.target.value)}
-          className="px-4 py-2 rounded-xl border"
         >
           <option value="all">All</option>
           <option value="pending">Pending</option>
