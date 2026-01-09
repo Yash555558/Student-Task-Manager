@@ -26,3 +26,65 @@ select:focus-visible {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+
+.confirm-box {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 320px;
+  animation: scaleIn 0.15s ease;
+}
+
+.confirm-box h3 {
+  margin: 0 0 0.25rem;
+}
+
+.confirm-box p {
+  margin: 0;
+  color: #666;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.cancel {
+  background: #e5e7eb;
+}
+
+.btn.delete {
+  background: #ef4444;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95) }
+  to { transform: scale(1) }
+}

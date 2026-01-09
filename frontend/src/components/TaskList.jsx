@@ -1,6 +1,6 @@
 import TaskCard from "./TaskCard";
 
-export default function TaskList({ tasks, onToggle, onDelete, setFilter, setSearch }) {
+export default function TaskList({ tasks, onToggle, onRequestDelete, setFilter, setSearch }) {
   return (
     <>
       <div className="flex flex-wrap gap-4 items-center mb-6">
@@ -25,7 +25,7 @@ export default function TaskList({ tasks, onToggle, onDelete, setFilter, setSear
             key={task._id}
             task={task}
             onToggle={onToggle}
-            onDelete={onDelete}
+            onRequestDelete={onRequestDelete}
           />
         ))}
       </section>

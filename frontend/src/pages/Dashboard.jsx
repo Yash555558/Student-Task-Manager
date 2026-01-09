@@ -4,12 +4,14 @@ import Header from "../components/Header";
 import TaskList from "../components/TaskList";
 import TaskForm from "../components/TaskForm";
 import Skeleton from "../components/Skeleton";
+import ConfirmDelete from "../components/ConfirmDelete";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [initialized, setInitialized] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     fetchTasks().then(data => {
@@ -49,6 +51,21 @@ export default function Dashboard() {
     }
   };
 
+  const confirmDelete = async () => {
+    const id = deleteTarget._id;
+    setDeleteTarget(null);
+
+    const snapshot = tasks;
+    setTasks(prev => prev.filter(t => t._id !== id));
+
+    try {
+      await deleteTask(id);
+    } catch {
+      setTasks(snapshot);
+      alert("Failed to delete task. Please try again.");
+    }
+  };
+
   const visibleTasks = tasks.filter(t => {
     if (filter === "completed" && !t.completed) return false;
     if (filter === "pending" && t.completed) return false;
@@ -65,10 +82,15 @@ export default function Dashboard() {
           <TaskList
             tasks={visibleTasks}
             onToggle={handleToggle}
-            onDelete={handleDelete}
+            onRequestDelete={setDeleteTarget}
             setFilter={setFilter}
             setSearch={setSearch}
           />}
+        <ConfirmDelete
+          open={!!deleteTarget}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={confirmDelete}
+        />
       </main>
     </>
   );

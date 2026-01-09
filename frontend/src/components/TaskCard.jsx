@@ -1,4 +1,4 @@
-export default function TaskCard({ task, onToggle, onDelete }) {
+export default function TaskCard({ task, onToggle, onRequestDelete }) {
   return (
     <div className={`rounded-2xl p-5 shadow-card transition hover:scale-[1.02]
       ${task.completed ? "bg-green-50" : "bg-white"}`}>
@@ -33,12 +33,7 @@ export default function TaskCard({ task, onToggle, onDelete }) {
             className="h-5 w-5 cursor-pointer"
           />
           <button
-            onClick={() => {
-              const confirmed = window.confirm(
-                `Are you sure you want to delete this task? This action cannot be undone.`
-              );
-              if (confirmed) onDelete(task._id);
-            }}
+            onClick={() => onRequestDelete(task)}
             className="text-sm text-danger hover:underline"
           >
             Delete
